@@ -6,10 +6,8 @@ const root = new URL('../', import.meta.url)
 const read = (name) => readFileSync(new URL(name, root), 'utf8')
 
 const pkg = JSON.parse(read('package.json'))
-const readme = read('README.md')
-const split = readme.indexOf('## 简体中文')
-const english = split >= 0 ? readme.slice(0, split) : readme
-const chinese = split >= 0 ? readme.slice(split) : ''
+const english = read('README.md')
+const chinese = read('README-zh.md')
 
 /** Pull the MESSAGES literal out of the client bundle without executing it. */
 function clientMessages() {
@@ -31,17 +29,15 @@ function clientMessages() {
   return new Function(`return ${source.slice(from, index + 1)}`)()
 }
 
-test('the README carries both languages', () => {
-  assert.match(readme, /## English/)
-  assert.match(readme, /## 简体中文/)
-  assert.ok(english.length > 500, 'the English half has content')
-  assert.ok(chinese.length > 500, 'the Chinese half has content')
+test('the two READMEs link to each other', () => {
+  assert.match(english, /English \| \[中文\]\(README-zh\.md\)/)
+  assert.match(chinese, /\[English\]\(README\.md\) \| 中文/)
 })
 
-test('both halves document the bridge tools and the drawer/desk metaphors', () => {
+test('each README documents the bridge tools and its own metaphors', () => {
   for (const [label, text, drawer, desk] of [
-    ['English', english, /drawer/i, /desk/i],
-    ['简体中文', chinese, /抽屉/, /桌面/],
+    ['README.md', english, /drawer/i, /desk/i],
+    ['README-zh.md', chinese, /抽屉/, /桌面/],
   ]) {
     for (const name of ['find_tool', 'describe_tool', 'use_tool']) {
       assert.ok(text.includes(name), `${label} mentions ${name}`)
@@ -51,11 +47,12 @@ test('both halves document the bridge tools and the drawer/desk metaphors', () =
   }
 })
 
-test('both halves list the version the package verified against', () => {
+test('each README lists the version the package verified against', () => {
   const verified = pkg.dsh?.verifiedWith
   assert.ok(typeof verified === 'string' && verified.length > 0, 'package.json declares dsh.verifiedWith')
-  assert.ok(english.includes(verified), `English half mentions ${verified}`)
-  assert.ok(chinese.includes(verified), `Chinese half mentions ${verified}`)
+  for (const [label, text] of [['README.md', english], ['README-zh.md', chinese]]) {
+    assert.ok(text.includes(verified), `${label} mentions ${verified}`)
+  }
 })
 
 test('the client dictionaries cover exactly the same keys', () => {
@@ -84,10 +81,11 @@ test('package exports and bundle entry point at files that exist', () => {
   read(pkg.dsh.bundle.patch)
 })
 
-test('the shipped file list has no missing or duplicated docs', () => {
+test('every shipped documentation file exists', () => {
   for (const entry of pkg.files) {
     if (entry === 'lib' || entry === 'locale') continue
     read(entry)
   }
-  assert.ok(!pkg.files.includes('README-zh.md'), 'the README is bilingual in one file')
+  assert.ok(pkg.files.includes('README.md'))
+  assert.ok(pkg.files.includes('README-zh.md'))
 })
