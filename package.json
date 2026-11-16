@@ -1,6 +1,6 @@
 {
   "name": "dsh-tool-drawer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Keep DeepSeek Harness's tool list small: the tools you use sit on the desk, everything else waits in a drawer and is fetched on demand.",
   "type": "module",
   "main": "lib/index.js",
@@ -41,8 +41,8 @@
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.1.0",
-    "@deepseek-ai/dsh-tools": ">=0.2.2-rc.3",
     "@deepseek-ai/dsh-system-prompt": ">=0.2.2-rc.3",
+    "@deepseek-ai/dsh-tools": ">=0.2.2-rc.3",
     "@deepseek-ai/schemastery": "^3.18.2"
   },
   "peerDependenciesMeta": {
