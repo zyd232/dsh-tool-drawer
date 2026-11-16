@@ -1,0 +1,17 @@
+# dependencies (the harness provides them; the local test junction lives here too)
+node_modules/
+
+# local scratch
+*.log
+*.bak-*
+.dsh-*
+.install-backup/
+
+# OS noise
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# the lockfile is not shipped and this package has no runtime deps; keeping it out
+# avoids a file that looks like it matters to users and churns on every release
+package-lock.json
