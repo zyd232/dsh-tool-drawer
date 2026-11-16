@@ -60,6 +60,11 @@ jobs:
           registry-url: https://registry.npmjs.org
           package-manager-cache: false
 
+      # Trusted publishing (OIDC) needs npm CLI 11.5.1+; the npm bundled with a
+      # current Node release can lag behind that, so upgrade it explicitly.
+      - name: Update npm
+        run: npm install -g npm@latest
+
       # The tests import one harness package (an optional peer, so consumers do not
       # install it); CI installs it to exercise the real host half.
       - name: Install test dependencies
