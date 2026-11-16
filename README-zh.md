@@ -2,14 +2,14 @@
 
 [English](README.md) | 中文
 
-**把工具当成一张桌子和一个抽屉。**
+**把工具都收进抽屉，要用的时候再摆上桌面。**
 
-DeepSeek Harness 每一步都会把每个工具的完整说明塞进模型上下文。多装几个插件和 MCP 之后，这笔开销会一直压在那里。这个插件负责把桌面收小。
+DSH 每一步都会把每个工具的完整说明塞进模型上下文。多装几个插件和 MCP 之后，光是「有哪些工具」就吃掉一大块窗口。这个插件让模型平时只看到桌面上那几样常用的，其余都躺在抽屉里——需要对哪个，拉开抽屉取出来用，用完再放回去。
 
-## 思路
+## 桌面和抽屉
 
-- **桌面** —— 伸手就能拿到的工具。它们的说明永远在上下文里。
-- **抽屉** —— 其他所有工具。不用的时候不花一分钱：模型点名要，插件拉开抽屉取出来、跑完再放回去。
+- **桌面** —— 伸手就能拿到的常用工具，它们的说明一直在上下文里。
+- **抽屉** —— 其他所有工具。平时不占地方，模型点名要的时候才被取出来。
 
 ## 两种模式
 
@@ -37,10 +37,16 @@ DeepSeek Harness 每一步都会把每个工具的完整说明塞进模型上下
 ## 安装
 
 ```powershell
+dsh plugin --profile <profile> add dsh-tool-drawer
+```
+
+或者从本地目录链接安装：
+
+```powershell
 dsh plugin --profile <profile> add link:/path/to/dsh-tool-drawer
 ```
 
-然后在 profile 的 `package.json` 里把 `dsh-tool-drawer` 加进 `dsh.profile.bundles`，重启 DSH。包发布到 npm 之后也可以直接按名字安装：`dsh plugin --profile <profile> add dsh-tool-drawer`。
+然后把 `dsh-tool-drawer` 加进 profile 的 `package.json` 的 `dsh.profile.bundles`，重启 DSH。
 
 ## 设置
 

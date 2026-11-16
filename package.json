@@ -1,7 +1,7 @@
 {
   "name": "dsh-tool-drawer",
   "version": "0.1.1",
-  "description": "Keep DeepSeek Harness's tool list small: the tools you use sit on the desk, everything else waits in a drawer and is fetched on demand.",
+  "description": "Put every tool in a drawer: everyday tools stay on the desk, everything else is fetched on demand.",
   "type": "module",
   "main": "lib/index.js",
   "exports": {

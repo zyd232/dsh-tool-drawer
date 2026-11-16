@@ -2,14 +2,14 @@
 
 English | [中文](README-zh.md)
 
-**Your tools, as a desk and a drawer.**
+**Put every tool in a drawer, and bring one to the desk only when it is needed.**
 
-DeepSeek Harness hands the model every tool's full schema on every single step. A few plugins and MCP servers later that is a large standing cost. This plugin keeps the desk small.
+DSH sends the full description of every tool on every single step. With a few plugins and MCP servers, merely listing them eats a large slice of the context window. This plugin keeps only the everyday tools on the desk; everything else stays in a drawer and is taken out when the model asks for it.
 
-## The idea
+## The desk and the drawer
 
-- **Desk** — the tools that are always within reach. Their schemas are always in the prompt.
-- **Drawer** — everything else. It costs nothing until it is needed: the model looks a tool up, the plugin fetches it and runs it.
+- **Desk** — the everyday tools within reach; their descriptions are always in the prompt.
+- **Drawer** — everything else. It costs nothing until it is needed.
 
 ## Two modes
 
@@ -37,10 +37,16 @@ Nothing is persisted, no tool registration is changed, and no preset is touched.
 ## Install
 
 ```powershell
+dsh plugin --profile <profile> add dsh-tool-drawer
+```
+
+Or link a local checkout:
+
+```powershell
 dsh plugin --profile <profile> add link:/path/to/dsh-tool-drawer
 ```
 
-Then add `dsh-tool-drawer` to `dsh.profile.bundles` in the profile's `package.json` and restart DSH. Once the package is published you can install it by name: `dsh plugin --profile <profile> add dsh-tool-drawer`.
+Then add `dsh-tool-drawer` to `dsh.profile.bundles` in the profile's `package.json` and restart DSH.
 
 ## Settings
 
