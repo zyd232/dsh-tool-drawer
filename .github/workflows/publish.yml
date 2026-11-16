@@ -14,6 +14,9 @@ name: publish
 #   1. a GitHub id-token (OIDC trusted publishing) when the run can mint one —
 #      nothing stored, and npm attaches provenance automatically;
 #   2. the NPM_TOKEN repository secret as the fallback.
+# A manual run can force either one with the `credential` input, which is how the
+# very first release goes out: trusted publishing can only be configured for a
+# package that already exists, so the first run uses `token`.
 #
 # Two things keep the id-token exchange working, and both are easy to break while
 # "tidying up" this file:
@@ -41,6 +44,11 @@ on:
         type: choice
         options: [patch, minor, major]
         default: patch
+      credential:
+        description: Credential to publish with (auto = OIDC when available)
+        type: choice
+        options: [auto, oidc, token]
+        default: auto
 
 permissions:
   contents: write # push the version commit, the tag, and the release
@@ -139,17 +147,25 @@ jobs:
       - name: Publish to npm
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          CREDENTIAL: ${{ github.event.inputs.credential || 'auto' }}
         run: |
           set -euo pipefail
-          if [ -n "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ]; then
+          use_oidc=no
+          case "$CREDENTIAL" in
+            oidc) use_oidc=yes ;;
+            token) use_oidc=no ;;
+            *) if [ -n "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ]; then use_oidc=yes; fi ;;
+          esac
+
+          if [ "$use_oidc" = yes ]; then
             echo "publishing with npm trusted publishing (OIDC)"
             unset NODE_AUTH_TOKEN
           elif [ -n "${NPM_TOKEN:-}" ]; then
-            echo "::warning::no id-token on this run — falling back to the NPM_TOKEN secret"
+            echo "publishing with the NPM_TOKEN secret"
             echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> "$HOME/.npmrc"
             export NODE_AUTH_TOKEN="$NPM_TOKEN"
           else
-            echo "::error::neither an id-token nor the NPM_TOKEN secret is available"
+            echo "::error::no id-token and no NPM_TOKEN secret — cannot publish"
             exit 1
           fi
           npm publish --access public
