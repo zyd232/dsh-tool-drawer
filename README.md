@@ -59,6 +59,7 @@ The panel follows DSH's language: English by default; DSH's Chinese locale (incl
 | DSH | Verified |
 |---|---|
 | 0.2.2-rc.3 | 2026-11-16 |
+| 0.2.2-rc.5 | 2026-11-18 |
 
 ## Notes
 

@@ -59,6 +59,7 @@ dsh plugin --profile <profile> add link:/path/to/dsh-tool-drawer
 | DSH | 验证日期 |
 |---|---|
 | 0.2.2-rc.3 | 2026-11-16 |
+| 0.2.2-rc.5 | 2026-11-18 |
 
 ## 注意
 

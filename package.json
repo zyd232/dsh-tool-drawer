@@ -31,11 +31,12 @@
         "@deepseek-ai/dsh-client-ui-settings"
       ]
     },
-    "verifiedWith": "0.2.2-rc.3",
+    "verifiedWith": "0.2.2-rc.5",
     "compatibility": {
       "dsh": ">=0.2.2-rc.3",
       "dshReleases": {
-        "0.2.2-rc.3": "compatible"
+        "0.2.2-rc.3": "compatible",
+        "0.2.2-rc.5": "compatible"
       }
     }
   },
