@@ -1,6 +1,6 @@
 {
   "name": "dsh-tool-drawer",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Put every tool in a drawer: everyday tools stay on the desk, everything else is fetched on demand.",
   "type": "module",
   "main": "lib/index.js",
