@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 
-import { apply } from '../lib/index.js'
+import { Config, apply } from '../lib/index.js'
 
 /**
  * The host rejects a tool value that is not lossless JSON. `JSON.stringify`
@@ -187,4 +187,31 @@ test('the master switch suppresses both the filter and the index', async () => {
   assert.equal(out, settled)
   const value = await registered.get('find_tool').execute({ query: 'comfy' }, exec())
   assert.equal(value.mode, 'proxy')
+})
+
+test('a host-evaluated config still drives the drawer', async () => {
+  // `internal/config` makes the host evaluate the Config schema before apply();
+  // every .volatile() field then arrives as a frozen `{ get() }` reference.
+  // Reproducing that shape end to end is the regression guard for issue #1:
+  // reading the references as plain values silently restored every default.
+  const evaluated = Config({
+    enabled: true,
+    mode: 'expand',
+    coreTools: 'read, web_search',
+    maxActive: 2,
+    searchLimit: 2,
+  })
+  const { tools } = harness({ config: evaluated })
+  const settled = await tools.resolve({ agent: { id: 'agent' } })
+  const visible = [...settled.view({ id: 'agent' }).keys()]
+  assert.ok(visible.includes('read'))
+  assert.ok(visible.includes('web_search'))
+  assert.ok(!visible.includes('mcp__comfy-mcp__run_workflow'))
+})
+
+test('a host-evaluated config can turn the drawer off', async () => {
+  const evaluated = Config({ enabled: false })
+  const { tools } = harness({ config: evaluated })
+  const settled = await tools.resolve({ agent: { id: 'agent' } })
+  assert.equal(settled.view({ id: 'agent' }).size, catalog().length)
 })

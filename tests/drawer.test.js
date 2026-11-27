@@ -10,8 +10,26 @@ import {
   keywordSearch,
   oneLine,
   parseToolList,
+  pickRef,
   resolveConfig,
 } from '../lib/drawer.js'
+
+/**
+ * A host volatile reference, shaped like the frozen `{ get() }` objects that
+ * schemastery's evaluation produces for `.volatile()` fields: read through
+ * `get()`, updated in place by the loader's volatile commit.
+ * @param {unknown} value - initial value.
+ * @returns {{ref: {get: () => unknown}, set: (next: unknown) => void}} the reference and its mutator.
+ */
+function volatileRef(value) {
+  let current = value
+  return {
+    ref: Object.freeze({ get: () => current }),
+    set(next) {
+      current = next
+    },
+  }
+}
 
 test('parseToolList splits on commas, spaces and full-width commas', () => {
   assert.deepEqual(parseToolList('read, write   edit，glob'), ['read', 'write', 'edit', 'glob'])
@@ -130,4 +148,48 @@ test('oneLine flattens whitespace and truncates', () => {
   assert.equal(oneLine('  a\n\n b  '), 'a b')
   assert.equal(oneLine('x'.repeat(50), 10).length, 10)
   assert.ok(oneLine('x'.repeat(50), 10).endsWith('…'))
+})
+
+test('resolveConfig dereferences host volatile references', () => {
+  // The host evaluates the Config schema before apply(); every .volatile()
+  // field arrives as a frozen { get() } reference, not a value. Reading them
+  // as plain values silently reset every setting to its default.
+  const config = resolveConfig({
+    enabled: volatileRef(false).ref,
+    mode: volatileRef('expand').ref,
+    coreTools: volatileRef('read, web_search').ref,
+    maxActive: volatileRef(3).ref,
+    searchLimit: volatileRef(4).ref,
+  })
+  assert.equal(config.enabled, false)
+  assert.equal(config.mode, 'expand')
+  assert.deepEqual([...config.core], ['read', 'web_search'])
+  assert.equal(config.maxActive, 3)
+  assert.equal(config.searchLimit, 4)
+})
+
+test('resolveConfig reads references live on every call', () => {
+  // The loader commits a volatile-only change in place, so the next read must
+  // observe it without reinstalling the plugin.
+  const mode = volatileRef('proxy')
+  const core = volatileRef('read')
+  const raw = { mode: mode.ref, coreTools: core.ref }
+  assert.equal(resolveConfig(raw).mode, 'proxy')
+  mode.set('expand')
+  core.set('read, pwsh')
+  assert.equal(resolveConfig(raw).mode, 'expand')
+  assert.deepEqual([...resolveConfig(raw).core], ['read', 'pwsh'])
+})
+
+test('resolveConfig tolerates foreign objects without a getter', () => {
+  const config = resolveConfig({ coreTools: { nope: true }, mode: { value: 'expand' } })
+  assert.equal(config.mode, 'proxy')
+  assert.deepEqual([...config.core], DEFAULT_CORE)
+})
+
+test('pickRef passes plain values and null through', () => {
+  assert.equal(pickRef('expand'), 'expand')
+  assert.equal(pickRef(false), false)
+  assert.equal(pickRef(undefined), undefined)
+  assert.equal(pickRef(null), null)
 })
